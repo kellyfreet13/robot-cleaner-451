@@ -9,15 +9,14 @@ class Map:
     def show(self):
         print(np.matrix(self.dirty))
 
-    def is_dirty(self):
-        if sum(sum(self.dirty, [])) > 0:
-            return True
-        else:
-            return False
+    # returns whether an (x, y) coordinate is dirty
+    def is_dirty(self, x, y):
+        return self.dirty[x][y]
 
 
 if __name__ == '__main__':
     test = Map(19, 19)
     test.show()
-    print(test.is_dirty())
+    print(test.is_dirty(0, 0))
+    print(test.is_dirty(1, 1))
 
