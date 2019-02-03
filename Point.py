@@ -1,3 +1,6 @@
+from Constants import MIDDLE_TRACK
+
+
 class Point:
     def __init__(self, row_init, col_init):
         self.row = row_init
@@ -6,6 +9,9 @@ class Point:
         # (0, 0) (0, 1)
         # (1, 0) (1, 1)
         # (2, 0) (2, 1)
+
+    def is_centered(self):
+        return self.col in MIDDLE_TRACK
 
     def change_vert_direction(self):
         # python ternary operator
@@ -27,7 +33,7 @@ class Point:
         return Point(self.row+self.vert_dir, self.col+1)
 
     def __repr__(self):
-        return ''.join(["Point(", str(self.row), ",", str(self.col), ")"])
+        return ''.join(["[", str(self.row), ",", str(self.col), "]"])
 
     # equality checker
     def __eq__(self, other):

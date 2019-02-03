@@ -16,7 +16,10 @@ class Map:
         return self.dirty[point.row][point.col]
 
     def clean(self, to_clean: Point):
-        self.dirty[to_clean.row][to_clean.col]
+        self.dirty[to_clean.row][to_clean.col] = 0
+
+    def set_map(self, arr):
+        self.dirty = arr
 
 
 if __name__ == '__main__':
