@@ -9,4 +9,3 @@ class Point:
 
     def __repr__(self):
         return ''.join(["Point(", str(self.x), ",", str(self.y), ")"])
-    
