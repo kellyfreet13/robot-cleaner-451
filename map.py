@@ -11,12 +11,12 @@ class Map:
     def show(self):
         print(np.matrix(self.dirty))
 
-    # returns whether an (x, y) coordinate is dirty
+    # returns whether an (row, col) coordinate is dirty
     def is_dirty(self, point: Point):
-        return self.dirty[point.x][point.y]
+        return self.dirty[point.row][point.col]
 
     def clean(self, to_clean: Point):
-        self.dirty[to_clean.x][to_clean.y]
+        self.dirty[to_clean.row][to_clean.col]
 
 
 if __name__ == '__main__':

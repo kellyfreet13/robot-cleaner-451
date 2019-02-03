@@ -58,4 +58,3 @@ if __name__ == '__main__':
     g.change_vert_direction()
     g = g.vert_right()
     assert g == Point(0, 2)
-    
