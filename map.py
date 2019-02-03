@@ -1,6 +1,8 @@
 import random
 import numpy as np
 
+from Point import Point
+
 
 class Map:
     def __init__(self, width, height):
@@ -9,9 +11,12 @@ class Map:
     def show(self):
         print(np.matrix(self.dirty))
 
-    # returns whether an (x, y) coordinate is dirty
-    def is_dirty(self, x, y):
-        return self.dirty[x][y]
+    # returns whether an (row, col) coordinate is dirty
+    def is_dirty(self, point: Point):
+        return self.dirty[point.row][point.col]
+
+    def clean(self, to_clean: Point):
+        self.dirty[to_clean.row][to_clean.col]
 
 
 if __name__ == '__main__':
