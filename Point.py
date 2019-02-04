@@ -1,13 +1,9 @@
-from Constants import MIDDLE_TRACK
 
 
 class Point:
     def __init__(self, row_init, col_init):
         self.row = row_init
         self.col = col_init
-
-    def is_centered(self):
-        return self.col in MIDDLE_TRACK
 
     def mid_left(self):
         return Point(self.row, self.col-1)
