@@ -4,17 +4,18 @@ from Point import Point
 
 class Robot:
     def __init__(self):
-        # start at location (x=0, y=0)
+        # start at location (row=0, col=0)
         self.start = Point(0, 0)
         self.track = [self.start]
 
-        # current location
-        self.loc = self.start
+        self.loc = self.start   # current location
+        self.vert_dir = 1       # signifies going 'down'
+        self.pos = 'left'       # on edge of 3-lane 'track'
+        self.map = None         # the map of dirty locations
 
-        self.pos = 'left'
-
-        # the map of dirty locations
-        self.map = None
+    def change_vert_direction(self):
+        # python ternary operator
+        self.vert_dir = 1 if self.vert_dir == -1 else -1
 
     def clean(self, task: Map):
         # set the map as a class variable
