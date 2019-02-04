@@ -1,5 +1,3 @@
-
-
 class Point:
     def __init__(self, row_init, col_init):
         self.row = row_init
