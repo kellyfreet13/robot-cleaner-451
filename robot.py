@@ -1,5 +1,6 @@
 from map import Map
 from Point import Point
+from Constants import MIDDLE_TRACK
 
 
 class Robot:
@@ -13,10 +14,21 @@ class Robot:
         self.pos = 'left'       # on edge of 3-lane 'track'
         self.map = None         # the map of dirty locations
 
+    # changes robots vertical direction from up to down or vice-versa
     def change_vert_direction(self):
         # python ternary operator
         self.vert_dir = 1 if self.vert_dir == -1 else -1
 
+    # if the robot is in a center track (track of width 3)
+    def is_centered(self):
+        return self.loc.col in MIDDLE_TRACK
+
+    # if the robot is on the top or bottom 'row' of the grid
+    def is_on_vert_boundary(self):
+        v_bounds = self.map.get_row_boundaries()
+        return self.loc.row == v_bounds[0] or self.loc.row == v_bounds[1]
+
+    # iterates over the map and cleans dirty locations
     def clean(self, task: Map):
         # set the map as a class variable
         self.map = task
@@ -24,12 +36,17 @@ class Robot:
         # just for testing, it will just move back and forth at the end
         i = 0
         while i < 10:
+            print('\n\n--------------Map-------------')
             self.map.show()
-            print('Robot at: ', self.loc, '\n')
+            print('---------Robot Status---------')
+            print('\tMoves: %d' % (len(self.track)-1))
+            print('\tLocation: ', self.loc)
+            print('\tOn vertical boundary?: ', self.is_on_vert_boundary(), '\n')
+
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
 
-            if not self.loc.is_centered():
+            if not self.is_centered():
                 if self.pos == 'left':
                     self.loc = self.loc.mid_right()
                     self.track.append(self.loc)
@@ -76,7 +93,6 @@ class Robot:
                 self.track.append(self.loc)
 
             i += 1
-            print('Robot has made %d moves' % len(self.track))
 
     def show(self):
         print('Number of steps: ', len(self.track) - 1)
