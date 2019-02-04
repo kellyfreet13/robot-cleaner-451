@@ -21,6 +21,10 @@ class Map:
     def set_map(self, arr):
         self.dirty = arr
 
+    # assumes a square map
+    def get_map_size(self):
+        return len(self.dirty) * len(self.dirty[0])
+
 
 if __name__ == '__main__':
     test = Map(19, 19)
