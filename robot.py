@@ -23,10 +23,19 @@ class Robot:
     def is_centered(self):
         return self.loc.col in MIDDLE_TRACK
 
-    # if the robot is on the top or bottom 'row' of the grid
-    def is_on_vert_boundary(self):
-        v_bounds = self.map.get_row_boundaries()
-        return self.loc.row == v_bounds[0] or self.loc.row == v_bounds[1]
+    # if we're on the upper row bound of the grid
+    def is_on_upper_bound(self):
+        return self.loc.row == 0
+
+    # if we're on the lower row bound of the grid
+    def is_on_lower_bound(self):
+        return self.loc.row == self.map.get_upper_bound()
+
+    # used for changing tracks
+    def right_shift(self, shift_amt):
+        for i in range(shift_amt):
+            self.loc = self.loc.mid_right()  # move right
+            self.track.append(self.loc)  # update track
 
     # iterates over the map and cleans dirty locations
     def clean(self, task: Map):
@@ -35,16 +44,40 @@ class Robot:
 
         # just for testing, it will just move back and forth at the end
         i = 0
-        while i < 10:
+        while i < 21:
             print('\n\n--------------Map-------------')
             self.map.show()
             print('---------Robot Status---------')
             print('\tMoves: %d' % (len(self.track)-1))
             print('\tLocation: ', self.loc)
-            print('\tOn vertical boundary?: ', self.is_on_vert_boundary(), '\n')
+            print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
 
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
+
+            # check if we should switch to the next track
+            # note that we are going left to right
+
+            # on bottom moving down or on top moving up
+            # (note that when we shift to a new track, we'll be on the bottom row.
+            #  we wouldn't want to shift again, because now we have to go up
+            if (
+                    self.is_on_lower_bound() and self.vert_dir == 1 or
+                    self.is_on_upper_bound() and self.vert_dir == -1
+            ):
+                if not self.is_centered() and self.pos == 'right':
+                    self.right_shift(2)
+                    self.change_vert_direction()
+                    continue
+                # if we're in the center and the row is clean
+                elif (
+                        self.is_centered() and
+                        not self.map.is_dirty(self.loc.mid_left()) and
+                        not self.map.is_dirty(self.loc.mid_right())
+                ):
+                    self.right_shift(3)
+                    self.change_vert_direction()
+                    continue
 
             if not self.is_centered():
                 if self.pos == 'left':
@@ -105,9 +138,9 @@ if __name__ == '__main__':
     home = Map(19, 19)
 
     test_map = [
-        [0, 0, 1],
-        [1, 0, 1],
-        [1, 0, 0]
+        [0, 0, 1, 0, 1, 1, 1, 0, 0],
+        [1, 0, 1, 1, 0, 0, 0, 1, 1],
+        [1, 0, 0, 0, 1, 0, 1, 0, 0]
     ]
     home.set_map(test_map)
     #home.show()
