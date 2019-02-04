@@ -7,6 +7,8 @@ from Point import Point
 class Map:
     def __init__(self, width, height):
         self.dirty = [[random.randint(0, 1) for i in range(height)] for j in range(width)]
+        self.width = width
+        self.height = height
 
     def show(self):
         print(np.matrix(self.dirty))
@@ -20,14 +22,16 @@ class Map:
 
     def set_map(self, arr):
         self.dirty = arr
+        self.width = len(arr[0])
+        self.height = len(arr)
 
     # assumes a square map
     def get_map_size(self):
         return len(self.dirty) * len(self.dirty[0])
 
-    # top or bottom row of matrix
-    def get_row_boundaries(self):
-        return 0, len(self.dirty)-1
+    # bottom row index of matrix
+    def get_upper_bound(self):
+        return self.height-1
 
 
 if __name__ == '__main__':
