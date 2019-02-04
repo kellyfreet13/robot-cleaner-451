@@ -25,6 +25,7 @@ class Map:
     def get_map_size(self):
         return len(self.dirty) * len(self.dirty[0])
 
+    # top or bottom row of matrix
     def get_row_boundaries(self):
         return 0, len(self.dirty)-1
 
