@@ -1,9 +1,9 @@
 from map import Map
 from Point import Point
-from Constants import MIDDLE_TRACK, TESTING, GOOD_NUM_TEST_RUNS
+from Constants import MIDDLE_TRACK
 
 
-class Robot:
+class OptimizedRobot:
     def __init__(self):
         # start at location (row=0, col=0)
         self.start = Point(0, 0)
@@ -35,17 +35,41 @@ class Robot:
     def right_shift(self, shift_amt):
         for i in range(shift_amt):
             self.loc = self.loc.mid_right()  # move right
+            if self.map.is_dirty(self.loc):
+                self.map.clean(self.loc)
             self.track.append(self.loc)  # update track
 
-    # displays state info
+    # Optimize cleaning when on the left
+    def optimize_side(self, side, is_digonal_dirty):
+        if side == 'left':
+            self.loc = self.loc.mid_left()  # move left
+            self.map.clean(self.loc)  # and clean
+            self.track.append(self.loc)  # update track
+            self.pos = 'left'
+        else:
+            self.loc = self.loc.mid_right()  # move right
+            self.map.clean(self.loc)  # and clean
+            self.track.append(self.loc)  # update track
+            self.pos = 'right'
+        if is_digonal_dirty:
+            self.loc = self.loc.vert_center(self.vert_dir)  # move down
+            self.map.clean(self.loc)  # and clean
+            self.track.append(self.loc)  # update track
+            self.recenter()
+        elif side == 'left':
+            self.loc = self.loc.vert_right(self.vert_dir)  # move diagonally to the center
+            self.track.append(self.loc)  # update track
+        else:
+            self.loc = self.loc.vert_left(self.vert_dir)  # move diagonally to the center
+            self.track.append(self.loc)  # update track
+
     def display_state(self):
-        if TESTING:
-            print('\n\n--------------Map-------------')
-            self.map.show()
-            print('---------Robot Status---------')
-            print('\tMoves: %d' % (len(self.track) - 1))
-            print('\tLocation: ', self.loc)
-            print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
+        print('\n\n--------------Map-------------')
+        self.map.show()
+        print('---------Robot Status---------')
+        print('\tMoves: %d' % (len(self.track) - 1))
+        print('\tLocation: ', self.loc)
+        print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
 
     def recenter(self):
         if self.pos == 'left':
@@ -68,14 +92,15 @@ class Robot:
                 self.loc.col == MIDDLE_TRACK[-1] and
                 self.is_on_upper_bound()
             ):
+                if self.map.is_dirty(self.loc.mid_left()):
+                    self.loc = self.loc.mid_left()
+                    self.map.clean(self.loc)
+                    self.track.append(self.loc)
+                    self.loc = self.loc.mid_right()
+                    self.track.append(self.loc)
                 break
 
-            print('\n\n--------------Map-------------')
-            self.map.show()
-            print('---------Robot Status---------')
-            print('\tMoves: %d' % (len(self.track)-1))
-            print('\tLocation: ', self.loc)
-            print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
+          #  self.display_state()
 
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
@@ -184,22 +209,6 @@ class Robot:
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
 
-            # if left is dirty, move there clean it and move back
-            if self.map.is_dirty(self.loc.mid_left()):
-                self.loc = self.loc.mid_left()
-                self.map.clean(self.loc)
-                self.track.append(self.loc)
-                self.loc = self.loc.mid_right()
-                self.track.append(self.loc)
-
-            # if right is dirty, same thing
-            if self.map.is_dirty(self.loc.mid_right()):
-                self.loc = self.loc.mid_right()
-                self.map.clean(self.loc)
-                self.track.append(self.loc)
-                self.loc = self.loc.mid_left()
-                self.track.append(self.loc)
-
         # clean the last column
         if self.is_centered():
             self.right_shift(2)
@@ -216,7 +225,7 @@ class Robot:
                 self.map.clean(self.loc)     # clean it
             self.loc = self.loc.vert_center(self.vert_dir)
             self.track.append(self.loc)
-            self.display_state()
+        #    self.display_state()
 
         # clean the very last square if it's dirty
         if self.map.is_dirty(self.loc):  # if it's dirty
@@ -227,39 +236,3 @@ class Robot:
 
         # requirement of the assignment
         assert len(self.track) < self.map.get_map_size()
-
-
-def record_run(avg):
-    # open file for reading and writing
-    with open('history.txt', 'r') as f:
-        best_run = f.readline()
-
-    if avg < int(best_run):
-        print('you beat your record, nice optimization!')
-        with open('history.txt', 'w') as f:
-            f.write(str(avg))
-    else:
-        print('nice try, optimization didn\'t work though')
-        print('best avg. run: ', best_run)
-
-
-def run_many(num_runs):
-    track_len = 0
-    for _ in range(num_runs):
-        m = Map(19, 19)
-        a = Robot()
-        a.clean(m)
-        track_len += len(a.track)
-    avg = round(track_len / num_runs)
-    record_run(avg)
-    print('Avg. track length: ', avg)
-
-
-if __name__ == '__main__':
-    # home = Map(19, 19)
-    # agent = Robot()
-    # agent.clean(home)
-    # agent.show()
-    # home.show()
-
-    run_many(GOOD_NUM_TEST_RUNS)
