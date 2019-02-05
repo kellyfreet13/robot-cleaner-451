@@ -179,6 +179,7 @@ class Robot:
                 self.map.clean(self.loc)
                 self.track.append(self.loc)
                 self.loc = self.loc.mid_right()
+                self.track.append(self.loc)
 
             # if right is dirty, same thing
             if self.map.is_dirty(self.loc.mid_right()):
@@ -186,6 +187,7 @@ class Robot:
                 self.map.clean(self.loc)
                 self.track.append(self.loc)
                 self.loc = self.loc.mid_left()
+                self.track.append(self.loc)
 
         # clean the last column
         if self.is_centered():
@@ -227,7 +229,7 @@ def record_run(avg):
             f.write(str(avg))
     else:
         print('nice try, optimization didn\'t work though')
-        print('best run: ', best_run)
+        print('best avg. run: ', best_run)
 
 
 def run_many(num_runs):
