@@ -42,9 +42,18 @@ class Robot:
         # set the map as a class variable
         self.map = task
 
-        # just for testing, it will just move back and forth at the end
-        i = 0
-        while i < 21:
+        # should be able to simplify this logic into just a while
+        # can't think that well right now though
+        while self.loc.col <= MIDDLE_TRACK[-1]+1:
+            # check if it's on the last iteration, naive. group later
+            if (
+                self.loc.col == MIDDLE_TRACK[-1] and
+                self.is_on_upper_bound()
+            ):
+                # need to check if row is clean first, but for now this will do
+                i = 1
+                break
+
             print('\n\n--------------Map-------------')
             self.map.show()
             print('---------Robot Status---------')
@@ -125,7 +134,24 @@ class Robot:
                 self.map.clean(self.loc)
                 self.track.append(self.loc)
 
-            i += 1
+            # if nothing is dirty, but we're not on an edge
+            # we'll get stuck otherwise!
+            # 0 0 0
+            # 0 0 0
+            # 1 1 1
+            elif (
+                ((not self.is_on_upper_bound()) and self.vert_dir == -1) or
+                ((not self.is_on_lower_bound()) and self.vert_dir == 1)
+            ):
+                if self.is_centered():
+                    self.loc = self.loc.vert_center(self.vert_dir)
+                    self.track.append(self.loc)
+                elif self.pos == 'left':
+                    self.loc = self.loc.mid_right(self.vert_dir)
+                    self.track.append(self.loc)
+                elif self.pos == 'right':
+                    self.loc = self.loc.mid_left(self.vert_dir)
+                    self.track.append(self.loc)
 
     def show(self):
         print('Number of steps: ', len(self.track) - 1)
@@ -136,14 +162,14 @@ class Robot:
 
 if __name__ == '__main__':
     home = Map(19, 19)
-
-    test_map = [
-        [0, 0, 1, 0, 1, 1, 1, 0, 0],
-        [1, 0, 1, 1, 0, 0, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 1, 0, 0]
-    ]
-    home.set_map(test_map)
-    #home.show()
+    print(MIDDLE_TRACK[-1])
+    # test_map = [
+    #     [0, 0, 1, 0, 1, 1, 1, 0, 0],
+    #     [1, 0, 1, 1, 0, 0, 0, 1, 1],
+    #     [1, 0, 0, 0, 1, 0, 1, 0, 0]
+    # ]
+    # home.set_map(test_map)
+    # home.show()
     agent = Robot()
     agent.clean(home)
     agent.show()
