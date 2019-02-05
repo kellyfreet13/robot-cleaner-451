@@ -64,6 +64,14 @@ class Robot:
             self.loc = self.loc.vert_left(self.vert_dir)  # move diagonally to the center
             self.track.append(self.loc)  # update track
 
+    def recenter(self):
+        if self.pos == 'left':
+            self.loc = self.loc.mid_right()
+            self.track.append(self.loc)
+        elif self.pos == 'right':
+            self.loc = self.loc.mid_left()
+            self.track.append(self.loc)
+
     # iterates over the map and cleans dirty locations
     def clean(self, task: Map):
         # set the map as a class variable
@@ -77,8 +85,6 @@ class Robot:
                 self.loc.col == MIDDLE_TRACK[-1] and
                 self.is_on_upper_bound()
             ):
-                # need to check if row is clean first, but for now this will do
-                i = 1
                 break
 
             print('\n\n--------------Map-------------')
@@ -185,6 +191,51 @@ class Robot:
                 elif self.pos == 'right':
                     self.loc = self.loc.mid_left(self.vert_dir)
                     self.track.append(self.loc)
+
+            # need to check if row is clean first
+
+            # just recenter for simplicity
+            if not self.is_centered():
+                self.recenter()
+
+            if self.map.is_dirty(self.loc):
+                self.map.clean(self.loc)
+
+            # if left is dirty, move there clean it and move back
+            if self.map.is_dirty(self.loc.mid_left()):
+                self.loc = self.loc.mid_left()
+                self.map.clean(self.loc)
+                self.track.append(self.loc)
+                self.loc = self.loc.mid_right()
+
+            # if right is dirty, same thing
+            if self.map.is_dirty(self.loc.mid_right()):
+                self.loc = self.loc.mid_right()
+                self.map.clean(self.loc)
+                self.track.append(self.loc)
+                self.loc = self.loc.mid_left()
+
+        # clean the last column
+        if self.is_centered():
+            self.right_shift(2)
+        elif self.pos == 'left':
+            self.right_shift(3)
+        elif self.pos == 'right':
+            self.right_shift(1)
+
+        # we're moving down the last column now
+        self.change_vert_direction()
+
+        while not self.is_on_lower_bound():
+            if self.map.is_dirty(self.loc):  # if it's dirty
+                self.map.clean(self.loc)     # clean it
+            self.loc = self.loc.vert_center(self.vert_dir)
+            self.track.append(self.loc)
+            self.display_state()
+
+        # clean the very last square if it's dirty
+        if self.map.is_dirty(self.loc):  # if it's dirty
+            self.map.clean(self.loc)
 
     def show(self):
         print('Number of steps: ', len(self.track) - 1)
