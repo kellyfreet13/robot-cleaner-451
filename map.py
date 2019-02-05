@@ -40,6 +40,7 @@ class Map:
                     return False
         return True
 
+
 if __name__ == '__main__':
     test = Map(19, 19)
     test.show()
