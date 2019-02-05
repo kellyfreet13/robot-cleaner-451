@@ -70,13 +70,6 @@ class Robot:
             ):
                 break
 
-            print('\n\n--------------Map-------------')
-            self.map.show()
-            print('---------Robot Status---------')
-            print('\tMoves: %d' % (len(self.track)-1))
-            print('\tLocation: ', self.loc)
-            print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
-
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
 
@@ -250,6 +243,7 @@ def run_many(num_runs):
         a = Robot()
         a.clean(m)
         track_len += len(a.track)
+        assert m.is_clean()
     avg = round(track_len / num_runs)
     record_run(avg)
     print('Avg. track length: ', avg)
