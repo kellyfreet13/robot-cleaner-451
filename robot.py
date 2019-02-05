@@ -37,14 +37,32 @@ class Robot:
             self.loc = self.loc.mid_right()  # move right
             self.track.append(self.loc)  # update track
 
-    # displays state info
-    def display_state(self):
-        print('\n\n--------------Map-------------')
-        self.map.show()
-        print('---------Robot Status---------')
-        print('\tMoves: %d' % (len(self.track) - 1))
-        print('\tLocation: ', self.loc)
-        print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
+    # Optimize cleaning when on the left
+    def optimize_side(self, side, is_digonal_dirty):
+        if side == 'left':
+            self.loc = self.loc.mid_left()  # move left
+            self.map.clean(self.loc)  # and clean
+            self.track.append(self.loc)  # update track
+        else:
+            self.loc = self.loc.mid_right()  # move right
+            self.map.clean(self.loc)  # and clean
+            self.track.append(self.loc)  # update track
+        if is_digonal_dirty:
+            self.loc = self.loc.vert_center(self.vert_dir)  # move down
+            self.map.clean(self.loc)  # and clean
+            self.track.append(self.loc)  # update track
+            if side == 'left':
+                self.loc = self.loc.mid_right()  # move back to the center
+                self.track.append(self.loc)  # update track
+            else:
+                self.loc = self.loc.mid_left()  # move back to the center
+                self.track.append(self.loc)  # update track
+        elif side == 'left':
+            self.loc = self.loc.vert_right(self.vert_dir)  # move diagonally to the center
+            self.track.append(self.loc)  # update track
+        else:
+            self.loc = self.loc.vert_left(self.vert_dir)  # move diagonally to the center
+            self.track.append(self.loc)  # update track
 
     # iterates over the map and cleans dirty locations
     def clean(self, task: Map):
@@ -63,7 +81,12 @@ class Robot:
                 i = 1
                 break
 
-            self.display_state()
+            print('\n\n--------------Map-------------')
+            self.map.show()
+            print('---------Robot Status---------')
+            print('\tMoves: %d' % (len(self.track)-1))
+            print('\tLocation: ', self.loc)
+            print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
 
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
@@ -104,15 +127,21 @@ class Robot:
 
             # check if a side is dirty
             if self.map.is_dirty(self.loc.mid_left()):
-                self.loc = self.loc.mid_left()   # move left
-                self.map.clean(self.loc)         # and clean
-                self.track.append(self.loc)      # update track
-                self.pos = 'left'
+                if self.map.is_dirty(self.loc.mid_right()) or self.is_on_lower_bound() or self.is_on_upper_bound():
+                    self.loc = self.loc.mid_left()   # move left
+                    self.map.clean(self.loc)         # and clean
+                    self.track.append(self.loc)      # update track
+                    self.pos = 'left'
+                else:
+                    self.optimize_side('left', self.map.is_dirty(self.loc.vert_left(self.vert_dir)))
             elif self.map.is_dirty(self.loc.mid_right()):
-                self.loc = self.loc.mid_right()  # move right
-                self.map.clean(self.loc)         # and clean
-                self.track.append(self.loc)      # update track
-                self.pos = 'right'
+                if self.map.is_dirty(self.loc.mid_left()) or self.is_on_lower_bound() or self.is_on_upper_bound():
+                    self.loc = self.loc.mid_right()  # move right
+                    self.map.clean(self.loc)         # and clean
+                    self.track.append(self.loc)      # update track
+                    self.pos = 'right'
+                else:
+                    self.optimize_side('right', self.map.is_dirty(self.loc.vert_right(self.vert_dir)))
 
             # left diagonal is dirty
             elif self.map.is_dirty(self.loc.vert_left(self.vert_dir)):
@@ -156,28 +185,6 @@ class Robot:
                 elif self.pos == 'right':
                     self.loc = self.loc.mid_left(self.vert_dir)
                     self.track.append(self.loc)
-
-        # clean the last column
-        if self.is_centered():
-            self.right_shift(2)
-        elif self.pos == 'left':
-            self.right_shift(3)
-        elif self.pos == 'right':
-            self.right_shift(1)
-
-        # we're moving down the last column now
-        self.change_vert_direction()
-
-        while not self.is_on_lower_bound():
-            if self.map.is_dirty(self.loc):  # if it's dirty
-                self.map.clean(self.loc)     # clean it
-            self.loc = self.loc.vert_center(self.vert_dir)
-            self.track.append(self.loc)
-            self.display_state()
-
-        # clean the very last square if it's dirty
-        if self.map.is_dirty(self.loc):  # if it's dirty
-            self.map.clean(self.loc)
 
     def show(self):
         print('Number of steps: ', len(self.track) - 1)
