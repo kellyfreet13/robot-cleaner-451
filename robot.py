@@ -232,6 +232,12 @@ def record_run(avg):
         print('best avg. run: ', best_run)
 
 
+def check_clean_map(map):
+    for i in range(map.width):
+        for j in range(map.height):
+            assert map.dirty[i][j] == 0
+
+
 def run_many(num_runs):
     track_len = 0
     for _ in range(num_runs):
@@ -239,6 +245,7 @@ def run_many(num_runs):
         a = Robot()
         a.clean(m)
         track_len += len(a.track)
+        check_clean_map(m)
     avg = round(track_len / num_runs)
     record_run(avg)
     print('Avg. track length: ', avg)
