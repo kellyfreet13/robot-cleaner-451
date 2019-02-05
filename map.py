@@ -33,6 +33,12 @@ class Map:
     def get_upper_bound(self):
         return self.height-1
 
+    def is_clean(self):
+        for i in range(self.width):
+            for j in range(self.height):
+                if self.dirty[i][j] == 1:
+                    return False
+        return True
 
 if __name__ == '__main__':
     test = Map(19, 19)
