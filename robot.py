@@ -70,13 +70,6 @@ class Robot:
             ):
                 break
 
-            print('\n\n--------------Map-------------')
-            self.map.show()
-            print('---------Robot Status---------')
-            print('\tMoves: %d' % (len(self.track)-1))
-            print('\tLocation: ', self.loc)
-            print('\tOn vertical boundary?: ', (self.is_on_upper_bound() or self.is_on_lower_bound()), '\n')
-
             if self.map.is_dirty(self.loc):
                 self.map.clean(self.loc)
 
@@ -190,6 +183,7 @@ class Robot:
                 self.map.clean(self.loc)
                 self.track.append(self.loc)
                 self.loc = self.loc.mid_right()
+                self.track.append(self.loc)
 
             # if right is dirty, same thing
             if self.map.is_dirty(self.loc.mid_right()):
@@ -197,6 +191,7 @@ class Robot:
                 self.map.clean(self.loc)
                 self.track.append(self.loc)
                 self.loc = self.loc.mid_left()
+                self.track.append(self.loc)
 
         # clean the last column
         if self.is_centered():
@@ -238,7 +233,7 @@ def record_run(avg):
             f.write(str(avg))
     else:
         print('nice try, optimization didn\'t work though')
-        print('best run: ', best_run)
+        print('best avg. run: ', best_run)
 
 
 def run_many(num_runs):
@@ -248,6 +243,7 @@ def run_many(num_runs):
         a = Robot()
         a.clean(m)
         track_len += len(a.track)
+        assert m.is_clean()
     avg = round(track_len / num_runs)
     record_run(avg)
     print('Avg. track length: ', avg)
