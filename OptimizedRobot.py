@@ -1,6 +1,7 @@
 from map import Map
+from robot import record_run
 from Point import Point
-from Constants import MIDDLE_TRACK
+from Constants import MIDDLE_TRACK, GOOD_NUM_TEST_RUNS
 
 
 class OptimizedRobot:
@@ -236,3 +237,16 @@ class OptimizedRobot:
 
         # requirement of the assignment
         assert len(self.track) < self.map.get_map_size()
+
+
+def run_many_optimized(num_runs):
+    track_len = 0
+    for _ in range(num_runs):
+        m = Map(19, 19)
+        a = OptimizedRobot()
+        a.clean(m)
+        track_len += len(a.track)
+        assert m.is_clean()
+    avg = round(track_len / num_runs)
+    record_run(avg)
+    print('Avg. track length: ', avg)
